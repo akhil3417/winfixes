@@ -1,77 +1,135 @@
-# User Profile Transfer
+# Input from User
+Write-Host 'Make sure the user has signed into both computers so their user profile will have been created.' -ForegroundColor Red 
+$originalComputerName = Read-Host "What is the computer name you're moving from?"
+$newComputerName = Read-Host 'What is the new computer name?'
+$username = Read-Host 'What is the username?'
+Write-Host 'What would you like to transfer?'
+Write-Host '1. Desktop' -ForegroundColor Blue
+Write-Host '2. Documents' -ForegroundColor Yellow
+Write-Host '3. Downloads' -ForegroundColor Cyan
+Write-Host '4. Browser Data' -ForegroundColor Magenta
+Write-Host '5. Everything' -ForegroundColor Red
+$selection = Read-Host 'Enter 1-5.'
 
-$FoldersToCopy = @(
-    'Desktop'
-    'Videos'
-    'Favorites'
-    # Microsoft Edge Favorites
-    'AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default\Favorites'
-    # Outlook Signatures
-    'AppData\Roaming\Microsoft\Signatures'
-    # Adding Taskbar Icons
-    'AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar'
-    # Google Chrome Favorites
-    'AppData\Local\Google\Chrome\User Data\Default'
-)
+# Copy From Here
+$oldDesktop = "\\$originalComputerName\c$\Users\$username\Desktop\*"
+$oldDownloads = "\\$originalComputerName\c$\Users\$username\Downloads\*"
+$oldDocuments = "\\$originalComputerName\c$\Users\$username\Documents\*"
+$oldChromeData = "\\$originalComputerName\c$\Users\$username\AppData\Local\Google\Chrome\User Data\Default\*"
+$oldEdgeData = "\\$originalComputerName\c$\Users\$username\AppData\Local\Microsoft\Edge\User Data\Default\*"
+$oldFirefoxData = "\\$originalComputerName\c$\Users\$username\AppData\Roaming\Mozilla\Firefox\Profiles\*"
 
-# Source Computer 
-$ConfirmComp1 = $null
-# Destination Computer
-$ConfirmComp2 = $null
-# Username
-$ConfirmUser = $null
+# Copy To Here
+$newDesktop = "\\$newComputerName\c$\Users\$username\Desktop\"
+$newDownloads = "\\$newComputerName\c$\Users\$username\Downloads\"
+$newDocuments = "\\$newComputerName\c$\Users\$username\Documents\"
+$newChromeData = "\\$newComputerName\c$\Users\$username\AppData\Local\Google\Chrome\User Data\Default\"
+$newEdgeData = "\\$newComputerName\c$\Users\$username\AppData\Local\Microsoft\Edge\User Data\Default\"
+$newFirefoxData = "\\$newComputerName\c$\Users\$username\AppData\Roaming\Mozilla\Firefox\Profiles\"
 
-# Checks to see if the source computer is online.
-while( $ConfirmComp1 -ne 'y' ){
-    $FromComputer = Read-Host -Prompt 'Enter the computer to copy from'
+# Copy Operations & Selection
+$copyOperations = @()
 
-    if( -not ( Test-Connection -ComputerName $FromComputer -Count 2 -Quiet ) ){
-        Write-Warning "$FromComputer is not online. Please enter another computer name."
-        continue
+switch ($selection) {
+    '1' { 
+        $copyOperations += @{
+            Source = $oldDesktop
+            Destination = $newDesktop
+            Description = "Copying Desktop Files"
+        }
     }
-
-    $ConfirmComp1 = Read-Host -Prompt "The entered computer name was:`t$FromComputer`r`nIs this correct? (y/n)"
+    '2' { 
+        $copyOperations += @{
+            Source = $oldDocuments
+            Destination = $newDocuments
+            Description = "Copying Documents"
+        }
+    }
+    '3' { 
+        $copyOperations += @{
+            Source = $oldDownloads
+            Destination = $newDownloads
+            Description = "Copying Downloads"
+        }
+    }
+    '4' { 
+        $copyOperations += @{
+            Source = $oldChromeData
+            Destination = $newChromeData 
+            Description = "Copying Chrome Data"
+        }
+        $copyOperations += @{
+            Source = $oldEdgeData
+            Destination = $newEdgeData 
+            Description = "Copying Edge Data"
+        }
+        $copyOperations += @{
+            Source = $oldFirefoxData
+            Destination = $newFirefoxData 
+            Description = "Copying Firefox Data"
+        }
+    }
+    '5' { 
+        $copyOperations += @{
+            Source = $oldDesktop
+            Destination = $newDesktop
+            Description = "Copying Desktop Files"
+        }
+        $copyOperations += @{
+            Source = $oldDocuments
+            Destination = $newDocuments
+            Description = "Copying Documents"
+        }
+        $copyOperations += @{
+            Source = $oldDownloads
+            Destination = $newDownloads
+            Description = "Copying Downloads"
+        }
+        $copyOperations += @{
+            Source = $oldChromeData
+            Destination = $newChromeData 
+            Description = "Copying Chrome Data"
+        }
+        $copyOperations += @{
+            Source = $oldEdgeData
+            Destination = $newEdgeData 
+            Description = "Copying Edge Data"
+        }
+        $copyOperations += @{
+            Source = $oldFirefoxData
+            Destination = $newFirefoxData 
+            Description = "Copying Firefox Data"
+        }
+    }
+    default { 
+        Write-Host "Invalid selection. Exiting." -ForegroundColor Red
+        exit
+    }
 }
 
-# Checks to see if the destination computer is online
-while( $ConfirmComp2 -ne 'y' ){
-    $ToComputer = Read-Host -Prompt 'Enter the computer to copy to'
 
-    if( -not ( Test-Connection -ComputerName $ToComputer -Count 2 -Quiet ) ){
-        Write-Warning "$ToComputer is not online. Please enter another computer name."
-        continue
+# Total number of operations for progress tracking
+$totalOperations = $copyOperations.Count
+
+# Perform copy operations with progress
+foreach ($operation in $copyOperations) {
+    $currentOperation = $copyOperations.IndexOf($operation) + 1
+    Write-Progress -Activity "Copying Files" `
+                   -Status $operation.Description `
+                   -PercentComplete (($currentOperation / $totalOperations) * 100)
+    
+    try {
+        Copy-Item -Path $operation.Source -Destination $operation.Destination -Recurse -ErrorAction SilentlyContinue
+        Write-Host "Successfully copied $($operation.Description)" -ForegroundColor Green
     }
-
-    $ConfirmComp2 = Read-Host -Prompt "The entered computer name was:`t$ToComputer`r`nIs this correct? (y/n)"
+    catch {
+        Write-Host "Error copying $($operation.Description): $($_.Exception.Message)" -ForegroundColor Red
+    }
 }
 
-# Checks to make sure the users profile already exist on both computers.
-# You can run this without this check but it causes strange errors. 
-# It is better to make sure each computer already have a copy of the users profile on it
-while( $ConfirmUser -ne 'y' ){
-    $User = Read-Host -Prompt 'Enter the user profile to copy from'
+# Complete the progress bar
+Write-Progress -Activity "Copying Files" -Completed
+Write-Host "File copy process completed." -ForegroundColor Cyan
 
-    if( (-not ( Test-Path -Path "\\$FromComputer\c$\Users\$User" -PathType Container)) -and (-not (Test-Path -Path "\\$ToComputer\c$\Users\$User" -PathType Container))){
-        Write-Warning "$User could not be found on $FromComputer. Please enter another user profile."
-        continue
-    }
-
-    $ConfirmUser = Read-Host -Prompt "The entered user profile was:`t$User`r`nIs this correct? (y/n)"
-}
-
-# Setting the file Path variables. 
-$SourceRoot      = "\\$FromComputer\c$\Users\$User"
-$DestinationRoot = "\\$ToComputer\c$\Users\$User"
-
-# This piece of code actually transfers the profile. 
-foreach( $Folder in $FoldersToCopy ){
-    $Source      = Join-Path -Path $SourceRoot -ChildPath $Folder
-    $Destination = Join-Path -Path $DestinationRoot -ChildPath $Folder
-
-    if( -not ( Test-Path -Path $Source -PathType Container ) ){
-        Write-Warning "Could not find path`t$Source"
-        continue
-    }
-
-    robocopy.exe $Source $Destination /E /IS /NP /NFL
-    }
+# Keep Window Open
+Read-Host "Press Enter to exit"
