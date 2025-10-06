@@ -1,0 +1,29 @@
+https://learn.microsoft.com/en-us/answers/questions/1287333/cant-remove-work-or-school-account-from-personal-p
+
+
+https://learn.microsoft.com/en-us/microsoft-365/enterprise/delete-and-restore-user-accounts-with-microsoft-365-powershell?view=o365-worldwide
+
+https://learn.microsoft.com/en-us/answers/questions/774931/a-powershell-command-to-disconnect-work-or-school
+
+
+https://aka.ms/SaRA-OfficeSignIn-sarahome
+
+
+
+Create an Identity Protection device configuration policy that sets “Disable Windows Hello for Business” to disabled. Target to a group containing users.
+
+Devices > Enroll Devices > Windows Hello for Business > set “Configure Windows Hello for Business” to disabled.
+
+Doing both has worked for me in multiple deployments
+
+
+
+Create this .reg file:
+
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\PassportForWork]
+
+"Enabled"=dword:00000000
+
+"DisablePostLogonProvisioning"=dword:00000000
