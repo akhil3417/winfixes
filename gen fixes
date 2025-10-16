@@ -33,3 +33,7 @@ click on
 Then you should see the list of problem drivers, which you can look to see if you can update to newer compatible drivers, or delete the offending drivers.
 
 In my case the offending drivers were PxHlpa64.sys (something apparently installed by Adobe products related to a DVD drive) and tib.sys (an Acronis driver related to image mounting). Having established that neither were crucial for my use I opted to simply rename the drivers with a command line in admin mode (they are found in C:\Windows\System32\drivers) and then on a reboot check that Memory Integrity could be enabled.
+
+
+
+https://learn.microsoft.com/en-us/answers/questions/4660558/outlook-indexing-never-completes-(solved)
