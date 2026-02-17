@@ -1,7 +1,17 @@
-Restart-Service LanmanServer -Force
+-Confirm:$false
+
+    Ensure-Services
+    Enable-Firewall
+    Enable-NetBIOS
+
+    if (-not (Get-SmbShare -Name $ShareName -ErrorAction SilentlyContinue)) {
+        New-SmbShare -Name $ShareName -Path $SharePath -FullAccess $Username -FolderEnumerationMode AccessBased
+    }
+
+    Restart-Service LanmanServer -Force
     Restart-Service LanmanWorkstation -Force
 
-    Show-Info -Mode "SECURE" -Password $PlainPassword
+    Show-ClientSteps -Mode "SECURE" -Password $PlainPassword
 }
 
 # ---------------- GUEST MODE ----------------
@@ -30,22 +40,19 @@ function Guest-SMB {
     Restart-Service LanmanServer -Force
     Restart-Service LanmanWorkstation -Force
 
-    Show-Info -Mode "GUEST"
+    Show-ClientSteps -Mode "GUEST"
 }
 
 # ---------------- RESET CLIENT ----------------
 function Reset-Client {
     Write-Host "n[ RESETTING CLIENT SMB CREDENTIALS ]n"
-
     net use * /delete /y | Out-Null
-
     cmdkey /list | ForEach-Object {
         if ($_ -match "Target") {
             $t = ($_ -split ":")[1].Trim()
             cmdkey /delete:$t | Out-Null
         }
     }
-
     Write-Host "✔ All SMB credentials cleared"
 }
 
