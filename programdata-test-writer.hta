@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>ProgramData XML Test Writer</title>
+  <HTA:APPLICATION
+    APPLICATIONNAME="ProgramData XML Test Writer"
+    BORDER="dialog"
+    CAPTION="yes"
+    MAXIMIZEBUTTON="no"
+    MINIMIZEBUTTON="yes"
+    SCROLL="no"
+    SINGLEINSTANCE="yes"
+    SYSMENU="yes"
+  />
+  <style>
+    body {
+      width: 460px;
+      margin: 0;
+      padding: 20px;
+      background: #f3f3f3;
+      color: #1f1f1f;
+      font: 13px "Segoe UI", Tahoma, sans-serif;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    p {
+      margin: 0 0 14px;
+      line-height: 1.45;
+    }
+    code {
+      color: #333;
+      font-family: Consolas, monospace;
+    }
+    button {
+      padding: 7px 16px;
+      border: 1px solid #888;
+      border-radius: 3px;
+      background: #e8e8e8;
+      cursor: pointer;
+      font: inherit;
+    }
+    button:hover { background: #dcecf9; border-color: #4285b4; }
+    button:active { background: #c6e0f5; }
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: 600;
+    }
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      height: 92px;
+      padding: 7px;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      background: #fff;
+      color: #222;
+      font: 11px Consolas, monospace;
+      resize: vertical;
+    }
+    #status {
+      min-height: 20px;
+      margin-top: 14px;
+      color: #176b2c;
+      white-space: pre-wrap;
+    }
+  </style>
+  <script type="text/javascript">
+    function createTestFiles() {
+      var fso = new ActiveXObject('Scripting.FileSystemObject');
+      var basePath = 'C:\\ProgramData\\';
+      var files = [
+        { name: 'Pro.xml', content: document.getElementById('proXml').value },
+        { name: 'Home.xml', content: document.getElementById('homeXml').value }
+      ];
+      var created = [];
+
+      for (var i = 0; i < files.length; i += 1) {
+        if (!files[i].content.replace(/^\s+|\s+$/g, '')) {
+          alert(files[i].name + ' is empty. Paste XML content before writing.');
+          return;
+        }
+        var output = fso.CreateTextFile(basePath + files[i].name, true);
+        output.Write(files[i].content);
+        output.Close();
+        created.push(basePath + files[i].name);
+      }
+
+      document.getElementById('status').innerText =
+        'Created test files:\n' + created.join('\n');
+    }
+  </script>
+</head>
+<body>
+  <h1>ProgramData XML Test Writer</h1>
+  <p>
+    Paste your test XML below. The tool writes the text exactly as entered to
+    <code>C:\ProgramData</code> and does not access Windows licensing directories.
+  </p>
+  <label for="proXml">Pro.xml content</label>
+  <textarea id="proXml"><?xml version="1.0" encoding="utf-8"?>
+<testDocument>
+  <edition>Pro</edition>
+  <purpose>Local XML file creation test only.</purpose>
+</testDocument></textarea>
+  <label for="homeXml">Home.xml content</label>
+  <textarea id="homeXml"><?xml version="1.0" encoding="utf-8"?>
+<testDocument>
+  <edition>Home</edition>
+  <purpose>Local XML file creation test only.</purpose>
+</testDocument></textarea>
+  <br>
+  <button type="button" onclick="createTestFiles()">Create test XML files</button>
+  <div id="status"></div>
+</body>
+</html>
